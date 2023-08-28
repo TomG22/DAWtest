@@ -1,6 +1,2 @@
-﻿  main.cpp
-C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWtest\main.cpp(57,18): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWtest\main.cpp(68,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWtest\main.cpp(69,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWtest\main.cpp(72,16): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-  DAWTest.vcxproj -> C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWtest\x64\Debug\DAWTest.exe
+﻿  player.cpp
+  DAWTest.vcxproj -> C:\Users\giall\Desktop\Programming\C++\DAWtest\DAWTest\x64\Debug\DAWTest.exe

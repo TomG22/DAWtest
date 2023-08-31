@@ -1,22 +1,40 @@
 #include "player.h"
+#include "input.h"
 #include <iostream>
 #include <Windows.h>
 #include "MMSystem.h"
+#include <chrono>
+
 #pragma comment(lib, "winmm.lib")
 
-using namespace std;
+
+using namespace std::chrono;
 
 player::player() {
-	std::cout << "playing sound\n";
-	PlaySound(TEXT("test"), NULL, SND_ASYNC);
-	double testTime = 2.0;
+	using namespace std;
+	// cout << "playing sound\n";
+	// 
+	// PlaySound(TEXT("test"), NULL, SND_ASYNC);
+	// double testTime = 1.0;
+	// auto start = std::chrono::steady_clock::now();
+	// auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0f;
+	// 
+	// int i = 0;
+	// while (deltaTime < testTime) {
+	// 	cout << testTime - deltaTime << '\n';
+	// 	deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0f;
+	// }
+	// PlaySound(TEXT("test"), NULL, SND_ASYNC);
+	// cout << "mid\n";
+	// start = std::chrono::steady_clock::now();
+	// deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0f;
+	// 
+	// while (deltaTime < testTime) {
+	// 	cout << testTime - deltaTime << '\n';
+	// 	deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0f;
+	// }
 
-	time_t start, end;
-
-	time(&start);
-	while (double(end - start)) {
-		
-	};
+	input();
 	cout << "played sound\n";
 
 }

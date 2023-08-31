@@ -1,4 +1,5 @@
 #include "synth.h"
+#include "input.h"
 #include <iostream>
 #include <cmath>
 
@@ -7,6 +8,7 @@ void synth::writeAsBytes(ofstream& file, int value, int byteSize) { // using thi
 }
 
 synth::synth() {
+	input();
 	ofstream wav;
 	wav.open("test.wav", ios::binary);
 

@@ -7,9 +7,9 @@ void synth::writeAsBytes(ofstream& file, int value, int byteSize) { // using thi
 	file.write(reinterpret_cast<const char*>(&value), byteSize); // calls file sending to function-ofstream has write function which can write in binary-reinterpret_cast takes value reference and turns it into const char by casting it
 }
 
-synth::synth() {
-	input();
+void synth::writeFrequency(double frequency) {
 	ofstream wav;
+
 	wav.open("test.wav", ios::binary);
 
 	if (wav.is_open()) {
@@ -35,7 +35,7 @@ synth::synth() {
 		for (int i = 0; i < sampleRate * duration; i++) {
 			// Respect max amplitude and operate as a wave
 			double amplitude = 5000;
-			double value = sin((2 * 3.14 * i * frequency) / sampleRate);
+			double value = sin((2 * 3.14 * i * frequency * 2) / sampleRate);
 
 			double channel1 = amplitude * value;
 			double channel2 = amplitude * value;
@@ -54,4 +54,7 @@ synth::synth() {
 	}
 
 	wav.close();
+}
+
+synth::synth() {
 }

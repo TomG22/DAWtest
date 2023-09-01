@@ -22,9 +22,10 @@ private:
 	const string subChunk2Size = "----";
 	void writeAsBytes(ofstream& file, int value, int byteSize);
 public:
+	synth();
+	void writeFrequency(double frequency);
 	const int duration = 2;
 	const int maxAmplitude = 32767;
-	const double frequency = 440;
-	synth();
+	
 
 };

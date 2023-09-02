@@ -1,5 +1,3 @@
-#include "synth.h"
-#include "player.h"
 #include "input.h"
 
 int main() {

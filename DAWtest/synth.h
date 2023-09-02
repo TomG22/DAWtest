@@ -3,11 +3,16 @@
 
 using namespace std;
 
+// implement attack decay sustain release system next
+// critically dampened spring in desmos: f\left(x\right)=e^{-wdx}\left(\cos\left(\alpha x\right)\ +\ \frac{wd}{\alpha}\sin\left(\alpha x\right)\right)
+
 class synth {
 private:
 	const string chunkId = "RIFF";
 	const string chunkSize = "----"; // Represents 4 placeholder bytes
 	const string format = "WAVE";
+
+	
 
 	// fmt sub-chunk
 	const string subChunk1Id = "fmt "; // Looks for 4 bytes, must have 'space'

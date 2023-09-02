@@ -34,7 +34,7 @@ void synth::writeFrequency(double frequency) {
 
 		for (int i = 0; i < sampleRate * duration; i++) {
 			// Respect max amplitude and operate as a wave
-			double amplitude = 5000;
+			double amplitude = 10000;
 			double value = sin((2 * 3.14 * i * frequency * 2) / sampleRate);
 
 			double channel1 = amplitude * value;

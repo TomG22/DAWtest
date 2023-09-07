@@ -1,7 +1,7 @@
 #include "input.h"
 
 int main() {
-	input hi;
+	input inputObj;
 
 	return 0;
 }

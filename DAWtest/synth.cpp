@@ -7,7 +7,7 @@ void synth::writeAsBytes(ofstream& file, int value, int byteSize) { // using thi
 	file.write(reinterpret_cast<const char*>(&value), byteSize); // calls file sending to function-ofstream has write function which can write in binary-reinterpret_cast takes value reference and turns it into const char by casting it
 }
 
-void synth::writeFrequency(double frequency) {
+void synth::writeFile() {
 	ofstream wav;
 
 	wav.open("test.wav", ios::binary);
@@ -32,13 +32,25 @@ void synth::writeFrequency(double frequency) {
 		//Marker for writing audio 
 		int startAudio = wav.tellp();
 
-		for (int i = 0; i < sampleRate * duration; i++) {
+		for (int time = 0; time < sampleRate * duration;time++) {
 			// Respect max amplitude and operate as a wave
-			double amplitude = 10000;
-			double value = sin((2 * 3.14 * i * frequency * 2) / sampleRate);
+			double frequencyValue = sin((2 * 3.14 * time * frequency * 2) / sampleRate);
+			double durationValue = sampleRate * duration;
+			double attackValue = attack * durationValue;
+			double decayValue = decay * durationValue;
+			double releaseValue = release * durationValue;
+			double envelopeValue = 0;
 
-			double channel1 = amplitude * value;
-			double channel2 = amplitude * value;
+			if (0 <= time && time <= attackValue) {
+				envelopeValue = time / attackValue;
+			} else if (attackValue <= time && time <= attackValue + decayValue) {
+				envelopeValue = ((sustain - 1) / decayValue) * (time - (attackValue + decayValue)) + sustain;
+			} else if (attackValue + decayValue <= time && time <= attackValue + decayValue + releaseValue) {
+				envelopeValue = -(sustain / releaseValue) * (time - (attackValue + decayValue + releaseValue));
+			}
+
+			double channel1 = amplitude * frequencyValue * envelopeValue;
+			double channel2 = amplitude * frequencyValue * envelopeValue;
 
 			// inserting channel data (l, r, l, r, l, r,...)
 			writeAsBytes(wav, channel1, 2);

@@ -10,13 +10,9 @@
 
 using namespace std::chrono;
 
-void player::playFrequency(double frequency) {
-	cout << "playing sound: " << frequency << " Hz\n";
-	synth synthObj;
-	synthObj.writeFrequency(frequency);
+void player::playTone(synth synthObj) {
+	synthObj.writeFile();
 	PlaySound(TEXT("test"), NULL, SND_ASYNC);
-	cout << "played sound: " << frequency << " Hz\n";
-
 };
 
 player::player() {

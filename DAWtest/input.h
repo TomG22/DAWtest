@@ -1,14 +1,21 @@
-#include "Windows.h"
-
 #pragma once
+
+#include "Windows.h"
+#include "synth.h"
 
 class input {
 
 private:
+	void updateInterface();
+	void processControlsInput();
+	void printControls();
 	void printKeyboardOutput();
-	void printNoteColor(int* config, int configLength, int keyIndex);
-	void printNoteName(int* config, int configLength, int keyIndex, int octave);
-	void keyboardConfig(int* conifg, int configLength);
+	void printNoteColor();
+	void printNoteName();
+	void processNoteInput();
 public:
+	int* configMap;
+	int configMapLength;
+	int keyIndex;
 	input();
 };

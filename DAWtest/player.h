@@ -1,8 +1,10 @@
 #pragma once
 
+#include "synth.h"
+
 class player {
 private:
 public:
-	void playFrequency(double frequency);
+	void playTone(synth synthObj);
 	player();
-;};
+};

@@ -7,10 +7,10 @@ void synth::writeAsBytes(ofstream& file, int value, int byteSize) { // using thi
 	file.write(reinterpret_cast<const char*>(&value), byteSize); // calls file sending to function-ofstream has write function which can write in binary-reinterpret_cast takes value reference and turns it into const char by casting it
 }
 
-void synth::writeFile() {
+void synth::writeFile(string fileName) {
 	ofstream wav;
 
-	wav.open("test.wav", ios::binary);
+	wav.open(fileName + ".wav", ios::binary);
 
 	if (wav.is_open()) {
 		wav << chunkId;

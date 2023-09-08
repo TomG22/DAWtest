@@ -26,16 +26,17 @@ private:
 
 public:
 	synth();
-	void writeFile();
+	void writeFile(string fileName);
 	double amplitude = 5000;	
 	int velocity = 10;
 	int frequency = 441;
 	double duration = 2;
 	double attack = 0.001;
 	double decay = .3;
-	double sustain = 0.1;
+	double sustain = 0.001;
 	double release = 0.001;
-	bool pedal = false;
 	int octave = 3;
+	bool pedal = false;
+
 
 };

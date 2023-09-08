@@ -4,22 +4,19 @@
 #include <Windows.h>
 #include "MMSystem.h"
 #include <chrono>
-
 #pragma comment(lib, "winmm.lib")
 
 
 using namespace std::chrono;
 
 void player::playTone(synth synthObj) {
-	synthObj.writeFile();
+	synthObj.writeFile("test");
 	PlaySound(TEXT("test"), NULL, SND_ASYNC);
-};
+}
 
 player::player() {
-	using namespace std;
-	
-
-
+	// using namespace std;
+	//
 	// cout << "playing sound\n";
 	// 
 	// PlaySound(TEXT("test"), NULL, SND_ASYNC);

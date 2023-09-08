@@ -93,12 +93,9 @@ void input::processNoteInput() {
 				lastPressed = keyIndex;
 				input::keyIndex = keyIndex;
 				synthObj.frequency = 130.81278265 * pow(double(2), double(keyIndex / 12.0));
-				//	synthObj.attack = 0;
-				//	synthObj.decay = 2;
-				//	synthObj.sustain = 1;
-				//	synthObj.release = 0;
+
 				updateInterface();
-				cout << "playing sound: " << synthObj.frequency << " Hz\n";
+				cout << "playing sound\n";
 				playerObj.playTone(synthObj);
 				cout << "played sound\n";
 			}
@@ -144,6 +141,7 @@ void input::printControls() {
 		cout << "Sustain: Off\n";
 	}
 	cout << "Duration: " << synthObj.duration << endl
+		<< "Frequency: " << synthObj.frequency << " Hz\n"
 		<< "Octave: " << synthObj.octave << endl 
 		<< "Velocity: " << synthObj.velocity << endl 
 		<< "Attack: " << synthObj.attack << 

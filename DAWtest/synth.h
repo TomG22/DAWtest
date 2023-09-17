@@ -29,7 +29,7 @@ public:
 	void writeFile(string fileName);
 	double amplitude = 5000;	
 	int velocity = 10;
-	int frequency = 441;
+	double frequency = 441;
 	double duration = 2;
 	double attack = 0.001;
 	double decay = .3;
@@ -37,6 +37,4 @@ public:
 	double release = 0.001;
 	int octave = 3;
 	bool pedal = false;
-
-
 };

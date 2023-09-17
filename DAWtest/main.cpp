@@ -1,7 +1,9 @@
-#include "input.h"
+#include "player.h"
+#include "gui.h"
 
 int main() {
-	input inputObj;
+	gui guiObj;
+
 
 	return 0;
 }

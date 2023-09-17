@@ -1,5 +1,4 @@
 #include "synth.h"
-#include "input.h"
 #include <iostream>
 #include <cmath>
 
@@ -31,10 +30,8 @@ void synth::writeFile(string fileName) {
 
 		//Marker for writing audio 
 		int startAudio = wav.tellp();
-
-		for (int time = 0; time < sampleRate * duration;time++) {
-			// Respect max amplitude and operate as a wave
-			double frequencyValue = sin((2 * 3.14 * time * frequency * 2) / sampleRate);
+		for (int time = 0; time < sampleRate * duration; time++) {
+			double amplitudeValue = sin((2 * 3.14 * time * frequency * 2) / sampleRate);
 			double durationValue = sampleRate * duration;
 			double attackValue = attack * durationValue;
 			double decayValue = decay * durationValue;
@@ -49,8 +46,8 @@ void synth::writeFile(string fileName) {
 				envelopeValue = -(sustain / releaseValue) * (time - (attackValue + decayValue + releaseValue));
 			}
 
-			double channel1 = amplitude * frequencyValue * envelopeValue;
-			double channel2 = amplitude * frequencyValue * envelopeValue;
+			double channel1 = amplitude * amplitudeValue * envelopeValue;
+			double channel2 = amplitude * amplitudeValue * envelopeValue;
 
 			// inserting channel data (l, r, l, r, l, r,...)
 			writeAsBytes(wav, channel1, 2);

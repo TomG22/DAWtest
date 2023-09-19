@@ -32,7 +32,7 @@ string keyNamesMap[] = {
 	"Caps Lock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "Right Shift",
 	"Left Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "Right Shift" };
 
-string controlsNames[] = { "Sustain", "Octave Down", "Octave Up", "Amplitude Down", "Amplitude Up" };
+string controlsNames[] = { "Sustain", "Octave Down", "Octave Up", "Velocity Down", "Velocity Up" };
 
 int controlsMap[] = { 42, 43, 44, 45, 46 };
 
@@ -81,20 +81,19 @@ void player::printNoteName() {
 	}
 }
 
-int lastPressed = 0;
 void player::processNoteInput(int keyCode, int state) {
 	for (int keyIndex = 0; keyIndex < configMapLength; keyIndex++) {
-		if (state != 0 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
-			if (lastPressed != keyIndex) { // optional bool to prevent console flickering
-				lastPressed = keyIndex;
-				player::keyIndex = keyIndex;
-				synthObj.frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthObj.octave - 3)) / 12.0)));
+		if (state == 1 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
+			player::keyIndex = keyIndex;
+			// Start at C frequency since it will be the first index
+			synthObj.frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthObj.octave - 3)) / 12.0)));
 
-				updateInterface();
-				cout << "playing sound\n";
-				playTone(synthObj);
-				cout << "played sound\n";
-			}
+			updateInterface();
+			cout << "playing sound\n";
+			synth synthObj2;
+			playTone(synthObj);
+			playTone(synthObj2);
+			cout << "played sound\n";
 		}
 	}
 }
@@ -105,9 +104,13 @@ void player::printKeyboardOutput() {
 
 void player::processControlsInput(int keyCode, int state) {
 	for (int keyIndex = 0; keyIndex < sizeof(controlsMap) / sizeof(int); keyIndex++) {
-		if (state != 0 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
+		if (state == 1 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
 			if (controlsNames[keyIndex] == "Sustain") {
-				synthObj.pedal = 1;
+				if (synthObj.pedal) {
+					synthObj.pedal = 0;
+				} else {
+					synthObj.pedal = 1;
+				}
 			}
 			if (controlsNames[keyIndex] == "Octave Down") {
 				synthObj.octave -= 1;
@@ -115,25 +118,31 @@ void player::processControlsInput(int keyCode, int state) {
 			else if (controlsNames[keyIndex] == "Octave Up") {
 				synthObj.octave += 1;
 			}
-			else if (controlsNames[keyIndex] == "Velocity Down") {
-				synthObj.velocity -= 5;
+			else if (synthObj.velocity > 0 && controlsNames[keyIndex] == "Velocity Down") {
+				synthObj.velocity -= 10;
 			}
 			else if (controlsNames[keyIndex] == "Velocity Up") {
-				synthObj.velocity += 5;
+				synthObj.velocity += 10;
 			}
 			updateInterface();
 		}
+		else if (state == 0 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
+			/* Computer keyboard input is limited so hold mode takes up an extra input space.
+			 * Eventually make ui for toggling between toggle and hold mode for sustain.
+			if (controlsNames[keyIndex] == "Sustain") {
+				synthObj.pedal = 0;
+			}	
+			*/
+			updateInterface();
+		}
 		else {
-			if (synthObj.pedal == true) {
-				// updateInterface();
-			}
-			synthObj.pedal = 0;
+			// key is held down
 		}
 	}
 }
 
 void player::printControls() {
-	if (synthObj.pedal == true) {
+	if (synthObj.pedal == 1) {
 		cout << "Sustain: On\n";
 	}
 	else {

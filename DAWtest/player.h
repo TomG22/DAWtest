@@ -5,6 +5,13 @@
 class player {
 private:
 public:
+	struct note {
+		std::string soundName;
+		bool isplaying = false;
+		bool stopping = false;
+		bool stopped = false;
+	};
+
 	void updateInterface();
 	void printControls();
 	void printKeyboardOutput();

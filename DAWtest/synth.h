@@ -28,7 +28,7 @@ public:
 	synth();
 	void writeFile(string fileName);
 	double amplitude = 5000;	
-	int velocity = 10;
+	int velocity = 100; // Percent of max amplitude
 	double frequency = 441;
 	double duration = 2;
 	double attack = 0.001;

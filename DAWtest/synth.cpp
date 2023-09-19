@@ -1,6 +1,7 @@
 #include "synth.h"
 #include <iostream>
 #include <cmath>
+#include <Portaudio/portaudio.h>
 
 void synth::writeAsBytes(ofstream& file, int value, int byteSize) { // using this to convert to correct byte format
 	file.write(reinterpret_cast<const char*>(&value), byteSize); // calls file sending to function-ofstream has write function which can write in binary-reinterpret_cast takes value reference and turns it into const char by casting it
@@ -46,8 +47,8 @@ void synth::writeFile(string fileName) {
 				envelopeValue = -(sustain / releaseValue) * (time - (attackValue + decayValue + releaseValue));
 			}
 
-			double channel1 = amplitude * amplitudeValue * envelopeValue;
-			double channel2 = amplitude * amplitudeValue * envelopeValue;
+			double channel1 = amplitude * velocity / 100 * amplitudeValue * envelopeValue;
+			double channel2 = amplitude * velocity / 100 * amplitudeValue * envelopeValue;
 
 			// inserting channel data (l, r, l, r, l, r,...)
 			writeAsBytes(wav, channel1, 2);

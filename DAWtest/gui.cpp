@@ -8,6 +8,10 @@ using namespace std;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+int gui::isKeyDown(int keyCode) {
+	return glfwGetKey(window, keyCode) != 0;
+}
+
 gui::gui() {
 	// Init GLFW
 	glfwInit();

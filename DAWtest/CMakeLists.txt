@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.25.1)
-project(PortAudioTest)
+project(DAWtest)
 
 add_executable(${PROJECT_NAME} main.cpp
-
+    gui.cpp
+    player.cpp
+    synth.cpp
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -21,4 +23,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     portaudio_static
+    glfw
+    winMM.Lib
 )

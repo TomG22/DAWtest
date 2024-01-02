@@ -41,14 +41,14 @@ int miniConfigMap[] = { 29, 16, 30, 17, 31, 32, 19, 33, 20, 34, 21, 35, 36, 23, 
 int largeConfigMap[] = { 14, 1, 15, 2, 16, 17, 4, 18, 5, 19, 6, 20, 21, 8, 22, 9, 23, 24, 11, 25, 12, 26, 13, 27 };
 
 
-//synth synthObj;
+synth synthObj;
 
 void player::playTone() {
-	synth synthObj;
+	synthObj.play();
 }
 
 void player::updateInterface() {
-	system("cls");
+	//system("cls");
 
 			// Keyboard Output
 	//...cout << "key pressed: " << keyNamesMap[configMap[keyIndex]] << endl;
@@ -99,8 +99,7 @@ void player::processNoteInput(int keyCode, int state) {
 		if (state == 1 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
 			player::keyIndex = keyIndex;
 			// Start at C frequency since it will be the first index
-			//synthObj.frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthObj.octave - 3)) / 12.0)));
-			
+			synthObj.frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthObj.octave - 3)) / 12.0)));
 			updateInterface();
 			//...cout << "playing sound\n";
 			playTone();

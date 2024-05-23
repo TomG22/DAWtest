@@ -1,10 +1,14 @@
 #pragma once
 #include "synth.h"
 #include <iostream>
+#include <thread>
 
-class player {
+class Player {
 private:
 public:
+	//std::thread playerThread;
+	Synth* synthPtr;
+
 	struct note {
 		std::string soundName;
 		bool isplaying = false;
@@ -12,6 +16,7 @@ public:
 		bool stopped = false;
 	};
 
+	Player();
 	void updateInterface();
 	void processControlsInput(int key, int action);
 	void processNoteInput(int key, int action);
@@ -19,5 +24,4 @@ public:
 	int configMapLength;
 	int keyIndex;
 	void playTone();
-	player();
 };

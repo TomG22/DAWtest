@@ -1,12 +1,10 @@
-#include "player.h"
+#include "Player.h"
 #include "gui.h"
 #include "synth.h"
 #include <iostream>
 #include <cmath>
-#include <Windows.h>
-#include "MMSystem.h"
 #include <chrono>
-#pragma comment(lib, "winmm.lib")
+#include <thread>
 
 using namespace std::chrono;
 
@@ -40,118 +38,10 @@ int controlsMap[] = { 42, 43, 44, 45, 46 };
 int miniConfigMap[] = { 29, 16, 30, 17, 31, 32, 19, 33, 20, 34, 21, 35, 36, 23, 37, 24, 38, 39 };
 int largeConfigMap[] = { 14, 1, 15, 2, 16, 17, 4, 18, 5, 19, 6, 20, 21, 8, 22, 9, 23, 24, 11, 25, 12, 26, 13, 27 };
 
-
-synth synthObj;
-
-void player::playTone() {
-	synthObj.play();
-}
-
-void player::updateInterface() {
-	//system("cls");
-
-			// Keyboard Output
-	//...cout << "key pressed: " << keyNamesMap[configMap[keyIndex]] << endl;
-
-		// Note Color
-	//...cout << "note color: ";
-	if (configMap[keyIndex] >= configMap[0] && configMap[keyIndex] <= configMap[configMapLength - 1]) {
-		//...cout << "white\n";
-	}
-	else if (configMap[keyIndex] >= configMap[1] && configMap[keyIndex] <= configMap[configMapLength - 2]) {
-		//...cout << "black\n";
-	}
-	else {
-		//...cout << "undefined\n";
-	}
-
-
-	//Note Name
-	char noteNames[] = { 'C', 'D', 'E', 'F', 'G', 'A', 'B' };
-	int whiteNoteIndex = configMap[keyIndex] - configMap[0];
-	int blackNoteIndex = configMap[keyIndex] - configMap[1];
-	if (configMap[keyIndex] >= configMap[0] && configMap[keyIndex] <= configMap[configMapLength - 1]) {
-		//...cout << "note: " << noteNames[(whiteNoteIndex % 7)] << synthObj.octave + ((whiteNoteIndex + 2) / 7) << endl;
-	}
-	else if (configMap[keyIndex] >= configMap[1] && configMap[keyIndex] <= configMap[configMapLength - 2]) {
-		//...cout << "note: " << noteNames[(blackNoteIndex % 7)] << '#' << synthObj.octave + ((blackNoteIndex + 2) / 7) << '/'
-		//	<< noteNames[(blackNoteIndex + 1) % 7] << 'b' << synthObj.octave + ((blackNoteIndex + 3) / 7) << endl;
-	}
-		// Controls
-	/*if (synthObj.pedal == 1) {
-		//...cout << "Sustain: On\n";
-	}
-	else {
-		//...cout << "Sustain: Off\n";
-	}
-	...cout << "Duration: " << synthObj.duration << endl
-		<< "Frequency: " << synthObj.frequency << " Hz\n"
-		<< "Octave: " << synthObj.octave << endl
-		<< "Velocity: " << synthObj.velocity << endl
-		<< "Attack: " << synthObj.attack <<
-		" | Decay: " << synthObj.decay <<
-		" | Sustain: " << synthObj.sustain <<
-		" | Release: " << synthObj.release << endl;*/
-}
-
-void player::processNoteInput(int keyCode, int state) {
-	for (int keyIndex = 0; keyIndex < configMapLength; keyIndex++) {
-		if (state == 1 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
-			player::keyIndex = keyIndex;
-			// Start at C frequency since it will be the first index
-			synthObj.frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthObj.octave - 3)) / 12.0)));
-			updateInterface();
-			//...cout << "playing sound\n";
-			playTone();
-			//...cout << "played sound\n";
-		}
-	}
-}
-
-void player::processControlsInput(int keyCode, int state) {
-	for (int keyIndex = 0; keyIndex < sizeof(controlsMap) / sizeof(int); keyIndex++) {
-		if (state == 1 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
-			/*if (controlsNames[keyIndex] == "Sustain") {
-				if (synthObj.pedal) {
-					synthObj.pedal = 0;
-				} else {
-					synthObj.pedal = 1;
-				}
-			}
-			if (controlsNames[keyIndex] == "Octave Down") {
-				synthObj.octave -= 1;
-			}
-			else if (controlsNames[keyIndex] == "Octave Up") {
-				synthObj.octave += 1;
-			}
-			else if (synthObj.velocity > 0 && controlsNames[keyIndex] == "Velocity Down") {
-				synthObj.velocity -= 10;
-			}
-			else if (controlsNames[keyIndex] == "Velocity Up") {
-				synthObj.velocity += 10;
-			}*/
-			updateInterface();
-		}
-		else if (state == 0 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
-			/* Computer keyboard input is limited so hold mode takes up an extra input space.
-			 * Eventually make ui for toggling between toggle and hold mode for sustain.
-			if (controlsNames[keyIndex] == "Sustain") {
-				synthObj.pedal = 0;
-			}	
-			*/
-			// updateInterface();
-		}
-		else {
-			// key is held down
-		}
-	}
-}
-
-player::player() {
-
+Player::Player() {
 	configMap = largeConfigMap;
 	configMapLength = sizeof(largeConfigMap) / sizeof(int);
-
+	this->synthPtr = new Synth();
 	/*
 	configMap = miniConfigMap;
 	configMapLength = sizeof(miniConfigMap) / sizeof(int);
@@ -182,4 +72,125 @@ player::player() {
 	// 	//...cout << testTime - deltaTime << '\n';
 	// 	deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0f;
 	// }
+}
+
+void Player::playTone() {
+	std::thread synthThread;
+	synthThread = std::thread(&Synth::play, synthPtr);
+	//synthPtr->play();
+
+/*std::thread worker2(timerObj.function2);
+  worker1.join();
+  worker2.join();*/
+
+/*timer timerObj;
+  std::thread worker1(timerObj.function1);
+  std::thread worker2(timerObj.function2);
+  worker1.join();
+  worker2.join();
+*/
+}
+
+void Player::updateInterface() {
+	//system("cls");
+
+			// Keyboard Output
+	//...cout << "key pressed: " << keyNamesMap[configMap[keyIndex]] << endl;
+
+		// Note Color
+	//...cout << "note color: ";
+	if (configMap[keyIndex] >= configMap[0] && configMap[keyIndex] <= configMap[configMapLength - 1]) {
+		//...cout << "white\n";
+	}
+	else if (configMap[keyIndex] >= configMap[1] && configMap[keyIndex] <= configMap[configMapLength - 2]) {
+		//...cout << "black\n";
+	}
+	else {
+		//...cout << "undefined\n";
+	}
+
+
+	//Note Name
+	char noteNames[] = { 'C', 'D', 'E', 'F', 'G', 'A', 'B' }; 
+	int whiteNoteIndex = configMap[keyIndex] - configMap[0];
+	int blackNoteIndex = configMap[keyIndex] - configMap[1];
+	if (configMap[keyIndex] >= configMap[0] && configMap[keyIndex] <= configMap[configMapLength - 1]) {
+		//...cout << "note: " << noteNames[(whiteNoteIndex % 7)] << synthPtr->octave + ((whiteNoteIndex + 2) / 7) << endl;
+	}
+	else if (configMap[keyIndex] >= configMap[1] && configMap[keyIndex] <= configMap[configMapLength - 2]) {
+		//...cout << "note: " << noteNames[(blackNoteIndex % 7)] << '#' << synthPtr->octave + ((blackNoteIndex + 2) / 7) << '/'
+		//	<< noteNames[(blackNoteIndex + 1) % 7] << 'b' << synthPtr->octave + ((blackNoteIndex + 3) / 7) << endl;
+	}
+		// Controls
+	/*if (synthPtr->pedal == 1) {
+		//...cout << "Sustain: On\n";
+	}
+	else {
+		//...cout << "Sustain: Off\n";
+	}
+	...cout << "Duration: " << synthPtr->duration << endl
+		<< "Frequency: " << synthPtr->frequency << " Hz\n"
+		<< "Octave: " << synthPtr->octave << endl
+		<< "Velocity: " << synthPtr->velocity << endl
+		<< "Attack: " << synthPtr->attack <<
+		" | Decay: " << synthPtr->decay <<
+		" | Sustain: " << synthPtr->sustain <<
+		" | Release: " << synthPtr->release << endl;*/
+}
+
+void Player::processNoteInput(int keyCode, int state) {
+	for (int keyIndex = 0; keyIndex < configMapLength; keyIndex++) {
+		if (state == 1 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
+			this->keyIndex = keyIndex;
+			// Start at C frequency since it will be the first index
+			synthPtr->frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthPtr->octave - 3)) / 12.0)));
+
+			//std::thread worker1(updateInterface, this);
+			//worker1.join();
+			
+			//updateInterface();
+			//...cout << "playing sound\n";
+			playTone();
+			//...cout << "played sound\n";
+		}
+	}
+}
+
+void Player::processControlsInput(int keyCode, int state) {
+	for (int keyIndex = 0; keyIndex < sizeof(controlsMap) / sizeof(int); keyIndex++) {
+		if (state == 1 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
+			/*if (controlsNames[keyIndex] == "Sustain") {
+				if (synthPtr->pedal) {
+					synthPtr->pedal = 0;
+				} else {
+					synthPtr->pedal = 1;
+				}
+			}
+			if (controlsNames[keyIndex] == "Octave Down") {
+				synthPtr->octave -= 1;
+			}
+			else if (controlsNames[keyIndex] == "Octave Up") {
+				synthPtr->octave += 1;
+			}
+			else if (synthPtr->velocity > 0 && controlsNames[keyIndex] == "Velocity Down") {
+				synthPtr->velocity -= 10;
+			}
+			else if (controlsNames[keyIndex] == "Velocity Up") {
+				synthPtr->velocity += 10;
+			}
+			updateInterface();
+		}
+		else if (state == 0 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
+			/* Computer keyboard input is limited so hold mode takes up an extra input space.
+			 * Eventually make ui for toggling between toggle and hold mode for sustain.
+			if (controlsNames[keyIndex] == "Sustain") {
+				synthPtr->pedal = 0;
+			}	
+			*/
+			// updateInterface();
+		}
+		else {
+			// key is held down
+		}
+	}
 }

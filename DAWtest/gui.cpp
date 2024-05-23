@@ -1,6 +1,8 @@
-#include "gui.h"
-#include "player.h"
+#include "Gui.h"
+#include "Player.h"
 #include <iostream>
+#include <thread>
+
 //#include <glad/glad.h>
 //#include <GLFW/glfw3.h>
 
@@ -8,12 +10,14 @@ using namespace std;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-int gui::isKeyDown(int keyCode) {
+int Gui::isKeyDown(int keyCode) {
 	return glfwGetKey(window, keyCode) != 0;
 }
 
-gui::gui() {
-	std::cout << "hi from gui";
+Gui::Gui() {
+	// Make a new player object
+	playerPtr = new Player();
+
 	// Init GLFW
 	glfwInit();
 
@@ -25,24 +29,24 @@ gui::gui() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Instance window
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Hi!", NULL, NULL);
-	
+	GLFWwindow* window = glfwCreateWindow(640, 480, "GFLW Window", NULL, NULL);
+
+	glfwSetWindowUserPointer(window, (void*)playerPtr);
+
 	// Set keyCallback
 	glfwSetKeyCallback(window, keyCallback);
 
 	// Window error condition
-	if (window == NULL) {
+	/*if (window == NULL) {
 		std::cout << "Failed to create window" << std::endl;
 		glfwTerminate();
-	}
-
-	// Instance player
+	}*/
 
 	// GLFW window loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwSwapBuffers(window);
 		glfwWaitEvents();
-	}
+	}	
 
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
@@ -51,10 +55,9 @@ gui::gui() {
 	glfwTerminate();
 }
 
-player playerObj;
-
-
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	playerObj.processNoteInput(key, action);
-	playerObj.processControlsInput(key, action);
+	Player* playerPtr = (Player*)glfwGetWindowUserPointer(window);
+	playerPtr->processNoteInput(key, action);
+	//std::thread playerThread;
+	//playerThread = std::thread(playerPtr->processNoteInput, playerPtr, key, action);
 }

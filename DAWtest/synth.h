@@ -3,7 +3,7 @@
 #include <iostream>
 #include "portaudio.h"
 
-class synth {
+class Synth {
 public:
 	PaStream *stream = 0;
 
@@ -26,6 +26,8 @@ public:
 	int octave = 4;
 	bool pedal = false;
 
+	Synth();
+
 	bool setTableValue(int key, float value);
 
 	float getTableValue(int key);
@@ -34,9 +36,13 @@ public:
 		unsigned long framesPerBuffer,
 		const PaStreamCallbackTimeInfo* timeInfo,
 		PaStreamCallbackFlags statusFlags);
+	
 	bool open(PaDeviceIndex index);
+	
 	bool close();
-	bool start();
+	
+	PaError start();
+	
 	bool stop();
 
 	void paStreamFinishedMethod();
@@ -47,9 +53,8 @@ public:
 	//double getCurrentBuffer();
 
 	//double getFrequency();
+	
 	void play();
 
 	void buffer();
-	synth();
-
 };

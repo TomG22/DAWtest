@@ -1,15 +1,16 @@
-#include "synth.h"
+#include "Synth.h"
 #include <stdio.h>
 #include <math.h>
+#include <thread>
 
 #define NUM_SECONDS   (1)
 #define SAMPLE_RATE   (44100)
 #define FRAMES_PER_BUFFER  (1024)
+#define PI (3.14159265)
 
-
-void synth::buffer() {
+void Synth::buffer() {
 	for( int time = 0; time < sampleRate; time++ ) {
-		double amplitudeValue = (float) sin( (double) time/tableSize * 3.14159265 * 2.0 * frequency);
+		double amplitudeValue = (float) sin( (double) time/tableSize * PI * 2.0 * frequency);
 		double durationValue = sampleRate * duration;
 		double attackValue = attack * durationValue;
 		double decayValue = decay * durationValue;
@@ -26,11 +27,9 @@ void synth::buffer() {
 
 		waveTable[time] = velocity / 100 * amplitudeValue * envelopeValue;
 	}
-
-	//sprintf( message, "No Message");
 }
 
-bool synth::setTableValue(int key, float value) {
+bool Synth::setTableValue(int key, float value) {
 	if (key >= 0 && key < tableSize) {
 		waveTable[key] = value;
 		return true;
@@ -38,7 +37,7 @@ bool synth::setTableValue(int key, float value) {
 	return false;
 }
 
-float synth::getTableValue(int key) {
+float Synth::getTableValue(int key) {
 	return waveTable[key];
 }
 
@@ -46,23 +45,26 @@ float synth::getTableValue(int key) {
 ** It may called at interrupt level on some machines so don't do anything
 ** that could mess up the system like calling malloc() or free().
 */
-static int paCallback( const void *inputBuffer, void *outputBuffer,
+static int paCallback(
+	const void *inputBuffer,
+	void *outputBuffer,
 	unsigned long framesPerBuffer,
 	const PaStreamCallbackTimeInfo* timeInfo,
 	PaStreamCallbackFlags statusFlags,
-	void *userData )
-{
-   /* Here we cast userData to Sine* type so we can call the instance method paCallbackMethod, we can do that since
-   	we called Pa_OpenStream with 'this' for userData */
-	return ((synth*)userData)->synth::paCallbackMethod(inputBuffer, outputBuffer,
+	void *userData ) {
+
+   /* Here we cast userData to a reference to our class so we can call the instance method paCallbackMethod,
+   	  we can do that since we called Pa_OpenStream with 'this' for userData */
+	return ((Synth*)userData)->Synth::paCallbackMethod(
+		inputBuffer,
+		outputBuffer,
 		framesPerBuffer,
 		timeInfo,
 		statusFlags);
 }
 
-bool synth::open(PaDeviceIndex index) {
+bool Synth::open(PaDeviceIndex index) {
 	PaStreamParameters outputParameters;
-
 
 	outputParameters.device = index;
 	if (outputParameters.device == paNoDevice) {
@@ -70,37 +72,33 @@ bool synth::open(PaDeviceIndex index) {
 	}
 
 	const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(index);
-	if (pInfo != 0)
-	{
+	if (pInfo != 0) {
 		//printf("Output device name: '%s'\r", pInfo->name);
 	}
 
-      outputParameters.channelCount = 2;       /* stereo output */
-      outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
+    outputParameters.channelCount = 2;       	// stereo output
+    outputParameters.sampleFormat = paFloat32; 	// 32 bit floating point output
 	outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
 	outputParameters.hostApiSpecificStreamInfo = NULL;
 
 	PaError err = Pa_OpenStream(
 		&stream,
-            NULL, /* no input */
+      	NULL, 							// no input
 		&outputParameters,
 		SAMPLE_RATE,
 		paFramesPerBufferUnspecified,
-            paClipOff,      /* we won't output out of range samples so don't bother clipping them */
+      	paClipOff,						// we won't output out of range samples so don't bother clipping them
 		&paCallback,
-            this            /* Using 'this' for userData so we can cast to Sine* in paCallback method */
-		);
+     	this);            				// Using 'this' for userData so we can cast to Sine* in paCallback method
 
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		//printf("Error: Failed to open stream to device");
 		return false;
 	}
 
 	err = Pa_SetStreamFinishedCallback( stream, paStreamFinished );
 
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		//printf("Error: Stream finished callback failed");
 		Pa_CloseStream( stream );
 		stream = 0;
@@ -110,7 +108,7 @@ bool synth::open(PaDeviceIndex index) {
 	return true;
 }
 
-bool synth::close() {
+bool Synth::close() {
 	if (stream == 0)
 		return false;
 
@@ -121,16 +119,16 @@ bool synth::close() {
 }
 
 
-bool synth::start() {
-	if (stream == 0)
+PaError Synth::start() {
+	/*if (stream == 0)
 		return false;
-
+	*/
 	PaError err = Pa_StartStream( stream );
 
-	return (err == paNoError);
+	return err;
 }
 
-bool synth::stop() {
+bool Synth::stop() {
 	if (stream == 0)
 		return false;
 
@@ -140,61 +138,57 @@ bool synth::stop() {
 }
 
     /* The instance callback, where we have access to every method/variable in object of class Sine */
-int synth::paCallbackMethod(const void *inputBuffer, void *outputBuffer,
+int Synth::paCallbackMethod(
+	const void *inputBuffer,
+	void *outputBuffer,
 	unsigned long framesPerBuffer,
 	const PaStreamCallbackTimeInfo* timeInfo,
-	PaStreamCallbackFlags statusFlags)
-{
+	PaStreamCallbackFlags statusFlags) {
 	float *out = (float*)outputBuffer;
 	unsigned long i;
-
-      (void) timeInfo; /* Prevent unused variable warnings. */
+//~
+	//printf("timeInfo: %d\n", timeInfo);
+//~
+	// Prevent unused variable warnings
+   	//(void) timeInfo;
 	(void) statusFlags;
 	(void) inputBuffer;
 
-	for( i=0; i<framesPerBuffer; i++ )
-	{
-         *out++ = waveTable[left_phase];  /* left */
-         *out++ = waveTable[right_phase];  /* right */
+	for( i=0; i<framesPerBuffer; i++ ) {
+         *out++ = waveTable[left_phase];
+         *out++ = waveTable[right_phase];
 
-		left_phase += 1;
+		left_phase++;
 		if( left_phase >= tableSize )
 			left_phase -= tableSize;
 
-		right_phase += 1;
+		right_phase++;
 		if( right_phase >= tableSize )
 			right_phase -= tableSize;
 	}
 
 	return paContinue;
-
 }
 
 
-void synth::paStreamFinishedMethod()
-    {
-        //printf( "Stream Completed: %s\n", message );
-    }
+void Synth::paStreamFinishedMethod() {
+        printf( "Stream Completed: %s\n", message );
+}
 
 /*
  * This routine is called by portaudio when playback is done.
  */
-void synth::paStreamFinished(void* userData)	
-{
-return ((synth*)userData)->paStreamFinishedMethod();
+void Synth::paStreamFinished(void* userData) {
+	return ((Synth*)userData)->paStreamFinishedMethod();
 }
 
 
 class ScopedPaHandler {
 public:
-	ScopedPaHandler()
-	: _result(Pa_Initialize())
-	{
+	ScopedPaHandler() : _result(Pa_Initialize()) {
 	}
-	~ScopedPaHandler()
-	{
-		if (_result == paNoError)
-		{
+	~ScopedPaHandler() {
+		if (_result == paNoError) {
 			Pa_Terminate();
 		}
 	}
@@ -205,28 +199,31 @@ private:
 	PaError _result;
 };
 
-void synth::play() {
+void Synth::play() {
 	//buffer bufferObj;
 	//currentBuffer = bufferObj;
+
+
 	ScopedPaHandler paInit;
-	if (open(Pa_GetDefaultOutputDevice()))
-	{
+
+	if (open(Pa_GetDefaultOutputDevice())) {
 		buffer();
-		if (start())
-		{
-			//printf("Play for %d seconds.\n", NUM_SECONDS );
-			Pa_Sleep( NUM_SECONDS * 1000 );
+		start();
+		// have to loop callbacks somehow in order for the stream to continue being played...may need to make external event system so gui can update as well
+		// for now, the stream could be processed on queue, but the gui won't be able to be processed during this time, hence ^
+		// or, multithreading can be used if possible
+		// int i = 0;
+		printf("Hi\n");
+		
 
-			stop();
-		}
-
-		close();
-	}  
+		Pa_Sleep(1000);
+	}
 }
 
-/*double synth::getCurrentBuffer() {
+/*double Synth::getCurrentBuffer() {
 	return currentBuffer;
 }*/
 
-synth::synth() {
+Synth::Synth() {
+	
 }

@@ -1,9 +1,14 @@
-#include "player.h"
-#include "gui.h"
+#include "Player.h"
+#include "Gui.h"
+#include <thread>
 
-//problem w/ linker for #include gui.h
 int main() {
-    gui guiObj;
-
+    Gui guiObj;
+    //std::thread worker1(Gui);
+    //worker1.join();
+    
+    while (true) {
+        
+    }
     return 0;
 }

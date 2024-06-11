@@ -1,15 +1,12 @@
 #include "Player.h"
-#include "gui.h"
-#include "synth.h"
 #include <iostream>
 #include <cmath>
 #include <chrono>
-#include <thread>
 
 using namespace std::chrono;
 
-// ARCH V2 opt 1: Input sends int key index and key up/down data. Player takes input, maps index to keymap and handles synth file properties
-// opt 2: Input handles index to keymap and only sends index of synth property with change (and maybe bool for delta vs set)
+// ARCH V2 opt 1: Input sends int key index and key up/down data. Player takes input, maps index to keymap and handles paStreamHandler file properties
+// opt 2: Input handles index to keymap and only sends index of paStreamHandler property with change (and maybe bool for delta vs set)
 
 
 // 18 key configMap: white: A -> ', black: W -> P | white: 29 -> 39, black: 16 -> 24
@@ -38,10 +35,9 @@ int controlsMap[] = { 42, 43, 44, 45, 46 };
 int miniConfigMap[] = { 29, 16, 30, 17, 31, 32, 19, 33, 20, 34, 21, 35, 36, 23, 37, 24, 38, 39 };
 int largeConfigMap[] = { 14, 1, 15, 2, 16, 17, 4, 18, 5, 19, 6, 20, 21, 8, 22, 9, 23, 24, 11, 25, 12, 26, 13, 27 };
 
-Player::Player() {
+Player::Player(PaStreamHandler* paStreamHandler) : paStreamHandler(paStreamHandler) {
 	configMap = largeConfigMap;
 	configMapLength = sizeof(largeConfigMap) / sizeof(int);
-	this->synthPtr = new Synth();
 	/*
 	configMap = miniConfigMap;
 	configMapLength = sizeof(miniConfigMap) / sizeof(int);
@@ -75,20 +71,7 @@ Player::Player() {
 }
 
 void Player::playTone() {
-	std::thread synthThread;
-	synthThread = std::thread(&Synth::play, synthPtr);
-	//synthPtr->play();
-
-/*std::thread worker2(timerObj.function2);
-  worker1.join();
-  worker2.join();*/
-
-/*timer timerObj;
-  std::thread worker1(timerObj.function1);
-  std::thread worker2(timerObj.function2);
-  worker1.join();
-  worker2.join();
-*/
+	paStreamHandler->play();
 }
 
 void Player::updateInterface() {
@@ -115,27 +98,27 @@ void Player::updateInterface() {
 	int whiteNoteIndex = configMap[keyIndex] - configMap[0];
 	int blackNoteIndex = configMap[keyIndex] - configMap[1];
 	if (configMap[keyIndex] >= configMap[0] && configMap[keyIndex] <= configMap[configMapLength - 1]) {
-		//...cout << "note: " << noteNames[(whiteNoteIndex % 7)] << synthPtr->octave + ((whiteNoteIndex + 2) / 7) << endl;
+		//...cout << "note: " << noteNames[(whiteNoteIndex % 7)] << paStreamHandler->octave + ((whiteNoteIndex + 2) / 7) << endl;
 	}
 	else if (configMap[keyIndex] >= configMap[1] && configMap[keyIndex] <= configMap[configMapLength - 2]) {
-		//...cout << "note: " << noteNames[(blackNoteIndex % 7)] << '#' << synthPtr->octave + ((blackNoteIndex + 2) / 7) << '/'
-		//	<< noteNames[(blackNoteIndex + 1) % 7] << 'b' << synthPtr->octave + ((blackNoteIndex + 3) / 7) << endl;
+		//...cout << "note: " << noteNames[(blackNoteIndex % 7)] << '#' << paStreamHandler->octave + ((blackNoteIndex + 2) / 7) << '/'
+		//	<< noteNames[(blackNoteIndex + 1) % 7] << 'b' << paStreamHandler->octave + ((blackNoteIndex + 3) / 7) << endl;
 	}
 		// Controls
-	/*if (synthPtr->pedal == 1) {
+	/*if (paStreamHandler->pedal == 1) {
 		//...cout << "Sustain: On\n";
 	}
 	else {
 		//...cout << "Sustain: Off\n";
 	}
-	...cout << "Duration: " << synthPtr->duration << endl
-		<< "Frequency: " << synthPtr->frequency << " Hz\n"
-		<< "Octave: " << synthPtr->octave << endl
-		<< "Velocity: " << synthPtr->velocity << endl
-		<< "Attack: " << synthPtr->attack <<
-		" | Decay: " << synthPtr->decay <<
-		" | Sustain: " << synthPtr->sustain <<
-		" | Release: " << synthPtr->release << endl;*/
+	...cout << "Duration: " << paStreamHandler->duration << endl
+		<< "Frequency: " << paStreamHandler->frequency << " Hz\n"
+		<< "Octave: " << paStreamHandler->octave << endl
+		<< "Velocity: " << paStreamHandler->velocity << endl
+		<< "Attack: " << paStreamHandler->attack <<
+		" | Decay: " << paStreamHandler->decay <<
+		" | Sustain: " << paStreamHandler->sustain <<
+		" | Release: " << paStreamHandler->release << endl;*/
 }
 
 void Player::processNoteInput(int keyCode, int state) {
@@ -143,14 +126,15 @@ void Player::processNoteInput(int keyCode, int state) {
 		if (state == 1 && keyCode == glfwKeyCodes[configMap[keyIndex]]) {
 			this->keyIndex = keyIndex;
 			// Start at C frequency since it will be the first index
-			synthPtr->frequency = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (synthPtr->octave - 3)) / 12.0)));
+			double frequencyVal = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (octave - 3)) / 12.0)));
+			//paStreamHandler->frequency = frequencyVal;
+			playTone();
 
 			//std::thread worker1(updateInterface, this);
 			//worker1.join();
 			
 			//updateInterface();
 			//...cout << "playing sound\n";
-			playTone();
 			//...cout << "played sound\n";
 		}
 	}
@@ -160,23 +144,23 @@ void Player::processControlsInput(int keyCode, int state) {
 	for (int keyIndex = 0; keyIndex < sizeof(controlsMap) / sizeof(int); keyIndex++) {
 		if (state == 1 && keyCode == glfwKeyCodes[controlsMap[keyIndex]]) {
 			/*if (controlsNames[keyIndex] == "Sustain") {
-				if (synthPtr->pedal) {
-					synthPtr->pedal = 0;
+				if (paStreamHandler->pedal) {
+					paStreamHandler->pedal = 0;
 				} else {
-					synthPtr->pedal = 1;
+					paStreamHandler->pedal = 1;
 				}
 			}
 			if (controlsNames[keyIndex] == "Octave Down") {
-				synthPtr->octave -= 1;
+				paStreamHandler->octave -= 1;
 			}
 			else if (controlsNames[keyIndex] == "Octave Up") {
-				synthPtr->octave += 1;
+				paStreamHandler->octave += 1;
 			}
-			else if (synthPtr->velocity > 0 && controlsNames[keyIndex] == "Velocity Down") {
-				synthPtr->velocity -= 10;
+			else if (paStreamHandler->velocity > 0 && controlsNames[keyIndex] == "Velocity Down") {
+				paStreamHandler->velocity -= 10;
 			}
 			else if (controlsNames[keyIndex] == "Velocity Up") {
-				synthPtr->velocity += 10;
+				paStreamHandler->velocity += 10;
 			}
 			updateInterface();
 		}
@@ -184,7 +168,7 @@ void Player::processControlsInput(int keyCode, int state) {
 			/* Computer keyboard input is limited so hold mode takes up an extra input space.
 			 * Eventually make ui for toggling between toggle and hold mode for sustain.
 			if (controlsNames[keyIndex] == "Sustain") {
-				synthPtr->pedal = 0;
+				paStreamHandler->pedal = 0;
 			}	
 			*/
 			// updateInterface();

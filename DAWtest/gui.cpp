@@ -1,23 +1,15 @@
 #include "Gui.h"
-#include "Player.h"
 #include <iostream>
-#include <thread>
-
-//#include <glad/glad.h>
-//#include <GLFW/glfw3.h>
 
 using namespace std;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-int Gui::isKeyDown(int keyCode) {
+bool Gui::isKeyDown(int keyCode) {
 	return glfwGetKey(window, keyCode) != 0;
 }
 
-Gui::Gui() {
-	// Make a new player object
-	playerPtr = new Player();
-
+void Gui::startGuiLoop() {
 	// Init GLFW
 	glfwInit();
 
@@ -44,9 +36,10 @@ Gui::Gui() {
 
 	// GLFW window loop
 	while (!glfwWindowShouldClose(window)) {
+		printf("gui thread id: %d\n", std::this_thread::get_id());
 		glfwSwapBuffers(window);
 		glfwWaitEvents();
-	}	
+	}
 
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
@@ -55,9 +48,15 @@ Gui::Gui() {
 	glfwTerminate();
 }
 
+Gui::Gui(Player* playerPtr) : playerPtr(playerPtr) {
+
+}
+
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	Player* playerPtr = (Player*)glfwGetWindowUserPointer(window);
-	playerPtr->processNoteInput(key, action);
+	//playerPtr->processNoteInput(key, action);
 	//std::thread playerThread;
 	//playerThread = std::thread(playerPtr->processNoteInput, playerPtr, key, action);
+	//playerThread.join();
+	playerPtr->processNoteInput(key, action);
 }

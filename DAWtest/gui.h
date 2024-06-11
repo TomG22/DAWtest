@@ -4,9 +4,14 @@
 #include <thread>
 
 class Gui {
-public:	
+public:
+	std::mutex mutex;
 	GLFWwindow* window;
 	Player* playerPtr;
-	Gui();
-	int isKeyDown(int keyCode);
+
+	Gui(Player* playerPtr);
+
+	void startGuiLoop();
+
+	bool isKeyDown(int keyCode);
 };

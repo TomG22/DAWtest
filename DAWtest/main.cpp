@@ -1,14 +1,18 @@
-#include "Player.h"
 #include "Gui.h"
-#include <thread>
+#include "Player.h"
+#include "PaStreamHandler.h"
 
+#include <thread>
+#include <iostream>
+#include <stdio.h>
 int main() {
-    Gui guiObj;
-    //std::thread worker1(Gui);
-    //worker1.join();
-    
-    while (true) {
-        
-    }
+    PaStreamHandler paStreamHandler = PaStreamHandler();
+    Player player = Player(&paStreamHandler);
+    Gui gui = Gui(&player);
+
+    std::thread guiThread = std::thread(&Gui::startGuiLoop, &gui);
+
+    guiThread.join();
+
     return 0;
 }

@@ -5,7 +5,7 @@ PROJ_NAME="DAWtest"
 # Delete the old file
 rm -f build/$PROJ_NAME.exe
 
-# Build
+# Build the executable
 cd build ; mingw32-make
 
 # Run the program if it exists

@@ -12,8 +12,7 @@ cd build ; mingw32-make
 
 # Run the program if it exists
 if [ -f $PROJ_NAME ]; then
-	echo ' ~ Running '$PROJ_NAME' executable'
-	start ./$PROJ_NAME.exe
+	echo ' ~ Successfully built the '$PROJ_NAME' executable'
 else
 	echo ' ~ FILE ERROR: Could not locate file: '$PROJ_NAME''
 fi

@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.27.8)
+cmake_minimum_required(VERSION 3.22.1)
 
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER c++)
 
+# add_compile_options(-Wall)
+
 project(DAWtest)
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
     src/main.cpp
     src/Gui.cpp
     src/KeyboardController.cpp

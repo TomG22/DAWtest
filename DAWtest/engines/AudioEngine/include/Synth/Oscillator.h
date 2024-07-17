@@ -24,6 +24,16 @@ public:
     /**
      * 
      */
+    double getFrequency();
+
+    /**
+     * 
+     */
+    void setFrequency(double newFrequency);
+
+    /**
+     * 
+     */
     void genSound(float* destination, int sampleIdx, int sampleCount);
 
     /**

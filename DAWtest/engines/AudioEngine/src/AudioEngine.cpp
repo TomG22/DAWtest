@@ -10,5 +10,6 @@ void AudioEngine::playSound(Sound* sound) {
     sound->registerDeviceInfo(&defaultDevice);
     sound->play();
     defaultStreamHandler.addSound(sound);
-    defaultStreamHandler.streamSounds();
+    defaultStreamHandler.paStartStream();
+    printf("Tried playing sound (from AE)\n");
 }

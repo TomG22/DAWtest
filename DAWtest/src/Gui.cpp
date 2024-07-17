@@ -38,7 +38,7 @@ void Gui::startGuiLoop() {
 
 	// GLFW window loop
 	while (!glfwWindowShouldClose(window)) {
-		printf("gui thread id: %d\n", std::this_thread::get_id());
+		//printf("gui thread id: %d\n", std::this_thread::get_id());
 		glfwSwapBuffers(window);
 		glfwWaitEvents();
 	}

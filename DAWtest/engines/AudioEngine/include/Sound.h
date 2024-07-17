@@ -59,6 +59,7 @@ public:
      * 
      */
     void play();
+    void play(int startFrame);
 
     /**
      * 
@@ -80,8 +81,8 @@ protected:
     unsigned long frameCount = 0;
     unsigned long framesGenerated = 0;
 
-    int id = 0;
-    int nextId = 0;
+    int id;
+    static int nextId;
 
     // Support wanted for:
     // Oscillators

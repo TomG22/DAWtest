@@ -25,9 +25,7 @@ public:
 
     int FRAMES_PER_BUFFER = 256;
 
-    /**
-     * 
-     */
+    std::mutex soundMapMutex;
     std::unordered_map<int, Sound*>& getSoundMap();
 
     /**
@@ -43,7 +41,7 @@ public:
     /**
      * Thread worker for the PortAudio stream
      */
-    void startPaStreamWorker();
+    void startThreadWorker();
     
     /**
      * The instance callback, where we have access to every method/variable in object of class Sine
@@ -92,7 +90,7 @@ private:
     
     PaStream* stream = nullptr;
     
-    bool streamIsActive = false;
+    bool isPlaying = false;
 
     Synth synth = Synth();
     std::unordered_map<int, Sound*> soundMap;

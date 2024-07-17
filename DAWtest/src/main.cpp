@@ -10,18 +10,16 @@
 
 int main() {
     AudioEngine audioEngine;
-    SynthSound sound = SynthSound(Oscillator::OscillatorType::sine, 1.00);
-    audioEngine.playSound(&sound);
-    printf("Tried to play sound (from main)\n");
     
     KeyboardController keyboardController = KeyboardController(&audioEngine);
     Gui gui = Gui(&keyboardController);
 
     std::thread guiThread = std::thread(&Gui::startGuiLoop, &gui);
+    guiThread.detach();
 
-    guiThread.join();
     while (true) {
-
+        //printf("~ Main thread is running ~\n");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     return 0;
 }

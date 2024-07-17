@@ -1,14 +1,18 @@
 #include "StreamHandler.h"
 #include <stdio.h>
+#include <cstring>
 #include <math.h>
 
-StreamHandler::StreamHandler(Device& device) {
-    this->device = device;
+StreamHandler::StreamHandler(Device& device) : device(device) {
     paInitResult = Pa_Initialize();
+
     if (paInitResult != 0) {
         printf("PaStream ERROR: Stream initialization failed\n");
     } else if (!paOpenStream(Pa_GetDefaultOutputDevice())){
         printf("PaStream ERROR: Failed to open stream\n");
+    } else {
+        std::thread streamHandlerThread = std::thread(&StreamHandler::startThreadWorker, this);
+        streamHandlerThread.detach();
     }
 }
 
@@ -25,7 +29,9 @@ std::unordered_map<int, Sound*>& StreamHandler::getSoundMap() {
 
 void StreamHandler::addSound(Sound* sound) {
     if (sound) {
+        soundMapMutex.lock();
         soundMap.insert({sound->getId(), sound});
+        soundMapMutex.unlock();
         printf("Added a new sound to the map\n");
         printf("Map isn't empty state: %d\n", !soundMap.empty());
     } else {
@@ -33,32 +39,33 @@ void StreamHandler::addSound(Sound* sound) {
     }
 }
 
-void StreamHandler::streamSounds() {
+/*void StreamHandler::streamSounds() {
     PaError result = Pa_IsStreamActive(stream);
     // If a stream is not active, start a stream worker on a new thread
     if (result == 0) {
-        paStartStream();
-
-        //std::thread streamHandlerThread = std::thread(&StreamHandler::startPaStreamWorker, this);
-        //streamHandlerThread.detach();
+        std::thread streamHandlerThread = std::thread(&StreamHandler::startPaStreamWorker, this);
+        streamHandlerThread.detach();
     } else if (result < 0) {
 
         printf("PaStream ERROR: Failed to check if stream is active\n");
     }
-}
+}*/
 
-void StreamHandler::startPaStreamWorker() {
+void StreamHandler::startThreadWorker() {
     //phase = 0;
     //cb = 0;
-    paStartStream();
-    printf("before loop - Map isn't empty state: %d\n", !soundMap.empty());
-    printf("stream is active: %d\n", streamIsActive);
-    while (!soundMap.empty()) {
-        //printf("..\n");
+    //paStartStream();
+    //printf("before loop - Map isn't empty state: %d\n", !soundMap.empty());
+    //printf("stream is active: %d\n", isPlaying);
+    //isPlaying = true;
+    while (true) {
+        //printf("~ Stream handler thread is running ~\n");
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        //printf("s is active: %d\n",isPlaying);
         //printf("mid loop - Map isn't empty state: %d\n", !soundMap.empty());
     }
-    printf("The worker loop stopped\n");
-    paStopStream();
+    //printf("The worker loop stopped\n");
+    //paStopStream();
     //printf("cb count: %d\n", cb);
     //printf("phase: %d\n", phase);
 }
@@ -93,89 +100,90 @@ int StreamHandler::paCallbackMethod(
     PaStreamCallbackFlags statusFlags,
     void* userData) {
 
+    //printf("Callback method is running once\n");
+
     // Hazard check for myself when testing
     if (framesPerBuffer != FRAMES_PER_BUFFER) {
-        printf("WARNING: Amount of frames per buffer is not 1024 in callback function\n");
-        printf("fpb: %d", framesPerBuffer);
+        printf("WARNING: Amount of frames per buffer (%d) is inconsistent in callback function\n", framesPerBuffer);
     }
-
-    float* out = (float*)outputBuffer;
 
     // Prevent unused variable warnings
     (void) timeInfo;
     (void) statusFlags;
     (void) inputBuffer;
+    float* out = (float*)outputBuffer;
 
-    streamIsActive = false;
+    memset(out, 0, framesPerBuffer * 2 * sizeof(float));
+
+    isPlaying = false;
+
+    soundMapMutex.lock();
     auto iter = soundMap.begin();
-    //printf("Callback method is running once\n");
 
     while (iter != soundMap.end()) {
         //printf("Found sounds in the map, starting loop...\n");
         if (iter->second->isPlaying()) {
             if (!iter->second->isGenerated()) {
-                streamIsActive = true;
+                isPlaying = true;
 
-                int framesNeeded = FRAMES_PER_BUFFER;
+                int framesNeeded = framesPerBuffer;
                 unsigned long framesLeft = iter->second->getFrameCount() - iter->second->getFramesGenerated();
 
-                if (framesLeft < FRAMES_PER_BUFFER) {
+                if (framesLeft < framesPerBuffer) {
                     framesNeeded = framesLeft;
                 }
-            /*
-            if (iter->second->getType() == Sound::SoundType::synth) {
-                printf("synth sound detected\n");
-                synth.genFrames((SynthSound*) iter->second, out, framesNeeded);
-            } else if (iter->second->getType() == Sound::SoundType::sample) {
-                printf("sample sound detected\n");
-                //synth.genFrames((FrameSound*) iter->second, out, inputFrames);
-            }*/
 
-            //printf("fc: %d\n", iter->second->getFrameCount());
-            //unsigned long fi = iter->second->getFramesGenerated();
-                for (int i = 0; i < FRAMES_PER_BUFFER; i++) {
-                    if (i < framesNeeded) {
-                        /*float frameValue = static_cast<float>(
-                                               (iter->second->getFrameCount() - (iter->second->getFramesGenerated() + i)) *
-                                               sin(((i + static_cast<double>(iter->second->getFramesGenerated())) / device.getSampleRate()) *
-                                               2 * 3.1459 * 440));*/
+                /*
+                if (iter->second->getType() == Sound::SoundType::synth) {
+                    printf("synth sound detected\n");
+                    synth.genFrames((SynthSound*) iter->second, out, framesNeeded);
+                } else if (iter->second->getType() == Sound::SoundType::sample) {
+                    printf("sample sound detected\n");
+                    //synth.genFrames((FrameSound*) iter->second, out, inputFrames);
+                }*/
 
-                        float amplitude = static_cast<float>(1 - ((static_cast<double>(iter->second->getFramesGenerated()) + i)/iter->second->getFrameCount()));
+                //printf("fc: %d\n", iter->second->getFrameCount());
+                //unsigned long fi = iter->second->getFramesGenerated();
 
+                out = (float*)outputBuffer;
 
-                        float frameValue = amplitude * static_cast<float>(sin((i + static_cast<double>(iter->second->getFramesGenerated())) / device.getSampleRate() * 2 * 3.1459 * 440));
-                        //printf("amp: %f\n", amplitude);
-                        //printf("fv: %f\n", frameValue);
-                        *out++ = frameValue;
-                        *out++ = frameValue;
+                SynthSound* sound = (SynthSound*)iter->second;
 
-                    } else {
-                        *out++ = 0;
-                        *out++ = 0;
+                for (int i = 0; i < framesNeeded; i++) {
+                    float amplitude = .2 * static_cast<float>(1 - ((static_cast<double>(sound->getFramesGenerated()) + i)/sound->getFrameCount()));
+                    float frameValue = *out + amplitude * static_cast<float>(sin((i + static_cast<double>(sound->getFramesGenerated())) / device.getSampleRate() * 2 * 3.1459 * sound->getBaseOscillator()->getFrequency()));
+
+                    // Normalize frameValue if it exceeds 1.0 or -1.0
+                    if (frameValue > 1.0f) {
+                        frameValue = 1.0f;
+                    } else if (frameValue < -1.0f) {
+                        frameValue = -1.0f;
                     }
-                }
-                iter->second->genFrames(framesNeeded);
 
-                //printf("fg: %d\n", fi);
-                ++iter;
+                    // Write stereo samples to outputBuffer, ensuring they do not exceed -1.0 to 1.0 range
+                    *out++ = frameValue;  // Left channel
+                    *out++ = frameValue;  // Right channel
+                    //printf("amp: %f\n", amplitude);
+                    //printf("fv: %f\n", frameValue);
+                }
+
+                iter->second->genFrames(framesNeeded);
+                ++iter; 
             } else {
-                printf("removed a sound from queue\n");
-            // Remove the sound from the map if it's done generating
+                //printf("removed a sound from queue\n");
+                // Remove the sound from the map if it's done generating
                 iter->second->stop();
                 iter = soundMap.erase(iter);
             }
+        } else {
+            // Remove the sound if it's not playing
+            iter = soundMap.erase(iter);
         }
     }
+    soundMapMutex.unlock();
 
+    return paContinue;
 
-    if (streamIsActive) {
-        return paContinue;
-    } else {
-        return paComplete;
-    }
-
-    //cb++;
-    //printf("streamHandler thread id: %d\n", std::this_thread::get_id());
 }
 
 bool StreamHandler::paOpenStream(PaDeviceIndex index) {
@@ -215,7 +223,7 @@ bool StreamHandler::paOpenStream(PaDeviceIndex index) {
 
     if (err != paNoError) {
         printf("PaStream ERROR: Failed to set the stream finished callback\n");
-        Pa_CloseStream( stream );
+        Pa_CloseStream(stream);
         stream = 0;
         return false;
     }
@@ -223,8 +231,9 @@ bool StreamHandler::paOpenStream(PaDeviceIndex index) {
     return true;
 }
 bool StreamHandler::paCloseStream() {
-    if (stream == 0)
+    if (stream == 0) {
         return false;
+    }
 
     PaError err = Pa_CloseStream(stream);
     stream = 0;
@@ -234,16 +243,22 @@ bool StreamHandler::paCloseStream() {
 
 
 PaError StreamHandler::paStartStream() {
-    //printf("Starting new stream...\n");
-    streamIsActive = true;
-    PaError err = Pa_StartStream(stream);
+    PaError err = paNoError;
 
+    if (!Pa_IsStreamActive(stream)) {
+        isPlaying = true;
+        err = Pa_StartStream(stream);
+        printf("Started a new stream\n");
+    }
+    
     return err;
 }
 
 bool StreamHandler::paStopStream() {
-    if (stream == 0)
+    printf("Stopping the stream...\n");
+    if (stream == 0)  {
         return false;
+    }
 
     PaError err = Pa_StopStream(stream);
 

@@ -101,6 +101,12 @@ void KeyboardController::processNoteInput(int keyCode, int state) {
             this->keyIndex = keyIndex;
             // Start at C frequency since it will be the first index
             double frequencyVal = round(130.81278265 * pow(2.0, double((keyIndex + 12 * (octave - 3)) / 12.0)));
+
+            SynthSound* sound = new SynthSound(Oscillator::OscillatorType::sine, 1.00);
+            sound->getBaseOscillator()->setFrequency(frequencyVal);
+            audioEngine->playSound(sound);
+            printf("Tried to play sound (from controller)\n");
+
             //paStreamHandler->frequency = frequencyVal;
             //playTone();
 

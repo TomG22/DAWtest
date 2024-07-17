@@ -6,6 +6,14 @@ Oscillator::Oscillator(OscillatorType type) : type(type) {
 
 }
 
+double Oscillator::getFrequency() {
+    return frequency;
+}
+
+void Oscillator::setFrequency(double newFrequency) {
+    frequency = newFrequency;
+}
+
 void Oscillator::genSound(float* destination, int frameIdx, int frameCount) {
 	if (type == OscillatorType::sine) {
 		printf("gening sine...\n");

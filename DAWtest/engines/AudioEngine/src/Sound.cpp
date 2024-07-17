@@ -2,8 +2,11 @@
 #include <cmath>
 #include <iostream>
 
+int Sound::nextId = 0;
+
 Sound::Sound(SoundType type, double time) : soundType(type), time(time) {
 	id = nextId++;
+	printf("new id: %d\n", id);
 }
 
 int Sound::getId() {
@@ -35,6 +38,12 @@ bool Sound::isPlaying() {
 }
 
 void Sound::play() {
+	framesGenerated = 0;
+	playing = true;
+}
+
+void Sound::play(int startFrame) {
+	framesGenerated = startFrame;
 	playing = true;
 }
 

@@ -1,20 +1,22 @@
 #!/bin/bash
 
-# Configure CMake
+# Build the CMake configuration
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "MinGW Makefiles"
-PROJ_NAME="DAWtest"
 
-# Delete the old fileS
-rm -f build/$PROJ_NAME
+cd build
+PROJ_NAME=$(grep "^CMAKE_PROJECT_NAME:STATIC=" CMakeCache.txt | sed 's/CMAKE_PROJECT_NAME:STATIC=//')
+
+# Delete the old executable
+rm -f $PROJ_NAME
 
 # Build the executable
-cd build ; mingw32-make
+cmake --build .
 
 # Run the program if it exists
 if [ -f $PROJ_NAME ]; then
-	echo ' ~ Successfully built the '$PROJ_NAME' executable'
+	echo ' ~ Successfully found the '$PROJ_NAME' executable'
 else
-	echo ' ~ FILE ERROR: Could not locate file: '$PROJ_NAME''
+	echo ' ~ Build ERROR: Could not locate executable: '$PROJ_NAME''
 fi
 
 # Exit terminal on key press

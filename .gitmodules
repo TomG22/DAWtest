@@ -1,0 +1,6 @@
+[submodule "lib/GUIEditor"]
+	path = lib/GUIEditor
+	url = git@github.com:TomG22/GUIEditor
+[submodule "lib/Synth"]
+	path = lib/Synth
+	url = git@github.com:TomG22/Synth
